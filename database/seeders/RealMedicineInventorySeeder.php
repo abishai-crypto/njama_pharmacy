@@ -76,7 +76,7 @@ class RealMedicineInventorySeeder extends Seeder
                     'unit_id' => $unit ? $unit->id : null,
                     'dosage_form' => $item['form'],
                     'strength' => $item['strength'],
-                    'pack_size' => $item['brand'],
+                    'pack_size' => isset($item['sales_style']) ? "{$item['brand']} ({$item['sales_style']})" : $item['brand'],
                     'requires_prescription' => $item['rx'],
                     'is_restricted' => $item['restricted'],
                     'purchase_cost' => $item['cost'],
@@ -87,7 +87,7 @@ class RealMedicineInventorySeeder extends Seeder
                 ]
             );
 
-            $subtotal = $item['qty'] * $item['cost'];
+            $subtotal = round($item['qty'] * $item['cost'], 2);
             $totalComputed += $subtotal;
 
             // Record Purchase Item
@@ -126,7 +126,7 @@ class RealMedicineInventorySeeder extends Seeder
                 ]
             );
 
-            // Record Movement ledger if not already recorded
+            // Record Movement ledger if not already recorded or update
             $existingMovement = InventoryMovement::where('product_id', $product->id)
                 ->where('batch_id', $batch->id)
                 ->where('reference_id', $purchase->invoice_number)
@@ -145,6 +145,12 @@ class RealMedicineInventorySeeder extends Seeder
                     'notes' => "Invoice receipt 20 Oct 2026: {$item['brand']}",
                     'user_id' => $adminId,
                     'created_at' => now(),
+                ]);
+            } else {
+                $existingMovement->update([
+                    'quantity' => $item['qty'],
+                    'balance_after' => $item['qty'],
+                    'unit_cost' => $item['cost'],
                 ]);
             }
         }
