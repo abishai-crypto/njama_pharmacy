@@ -1,0 +1,11 @@
+.git
+.github
+node_modules
+vendor
+.env
+.env.backup
+.phpunit.result.cache
+tests
+MWONGOZO_NA_MAELEZO_YA_MFUMO_NJAMA_PHARMACY.doc
+MWONGOZO_NA_MAELEZO_YA_MFUMO_NJAMA_PHARMACY.docx
+*.md

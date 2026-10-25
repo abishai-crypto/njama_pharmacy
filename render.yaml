@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: njama-pharmacy
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    envVars:
+      - key: APP_NAME
+        value: "NJAMA PHARMACY"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_TIMEZONE
+        value: "Africa/Dar_es_Salaam"
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/html/database/database.sqlite
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_DRIVER
+        value: file
+      # Kama unataka MySQL ya TiDB Cloud au Aiven, badilisha hizi:
+      # - key: DB_CONNECTION
+      #   value: mysql
+      # - key: DB_HOST
+      #   value: gateway01.eu-central-1.prod.aws.tidbcloud.com
+      # - key: DB_PORT
+      #   value: "4000"
+      # - key: DB_DATABASE
+      #   value: njama_pharmacy
+      # - key: DB_USERNAME
+      #   value: your_user
+      # - key: DB_PASSWORD
+      #   value: your_password
