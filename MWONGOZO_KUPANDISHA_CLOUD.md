@@ -71,7 +71,7 @@ Render itachukua kodi kutoka GitHub na kufanya yafuatayo moja kwa moja:
 3. Itatengeneza database na kuendesha migrations zote (`php artisan migrate --force`).
 4. Itaweka data zote za majaribio na dawa halisi (`php artisan db:seed --force`).
 5. Itawasha mfumo na kukupa link ya bure kama vile:
-   👉 **`https://njama-pharmacy.onrender.com`**
+   👉 **`https://njama-pharmacy-tmfu.onrender.com`**
 
 ---
 

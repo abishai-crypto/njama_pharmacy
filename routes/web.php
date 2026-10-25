@@ -30,7 +30,7 @@ Route::get('/lang/{locale}', [LanguageController::class, 'switchLang'])->name('l
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Authenticated Application Routes
 Route::middleware(['auth'])->group(function () {

@@ -14,6 +14,10 @@ services:
         value: "false"
       - key: APP_KEY
         value: "base64:XhukyggdlEWoCIOQO8o+ft2r5iUq9O7maNo7g3lE4UU="
+      - key: APP_URL
+        value: "https://njama-pharmacy-tmfu.onrender.com"
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
       - key: APP_TIMEZONE
         value: "Africa/Dar_es_Salaam"
       - key: LOG_CHANNEL
