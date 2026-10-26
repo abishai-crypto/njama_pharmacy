@@ -85,8 +85,11 @@ Mteja wako anaweza kuingia na kujaribu mfumo kwa kutumia akaunti zifuatazo ziliz
 | **Admin (Technician - Abishai)** | `abishai` au `abishai@njamapharmacy.co.tz` | `Admin@12345` |
 | **Pharmacist (Mtoa Dawa)** | `pharmacist` au `pharmacist@njamapharmacy.co.tz` | `Pharm@12345` |
 | **Cashier (Muuzaji - POS)** | `cashier` au `cashier@njamapharmacy.co.tz` | `Cash@12345` |
-| **Inventory Officer (Stoo)** | `inventory` au `inventory@njamapharmacy.co.tz` | `Store@12345` |
 | **Auditor (Mkaguzi Hesabu)** | `auditor` au `auditor@njamapharmacy.co.tz` | `Audit@12345` |
+
+### 🛡️ Usimamizi wa Nenosiri (Password Management):
+- Msimamizi Mkuu (**Admin**) ana uwezo kamili wa kubadilisha nenosiri (password) la mfanyakazi yeyote wakati wowote moja kwa moja kupitia menyu ya **Wafanyakazi (Users)**.
+- Bonyeza kitufe cha manjano cha **"Nenosiri"** pembeni ya jina la mfanyakazi, weka nenosiri jipya au bonyeza **"Tengeneza Nenosiri Nguvu Kiotomatiki"** kisha hifadhi.
 
 ---
 

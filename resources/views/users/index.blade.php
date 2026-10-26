@@ -104,6 +104,9 @@
                             </td>
                             <td class="text-end pe-4">
                                 <div class="d-inline-flex gap-1">
+                                    <button class="btn btn-sm btn-outline-warning text-dark" data-bs-toggle="modal" data-bs-target="#resetPasswordModal{{ $u->id }}" title="Badilisha Nenosiri (Password)">
+                                        <i class="bi bi-key-fill me-1"></i> Nenosiri
+                                    </button>
                                     <button class="btn btn-sm btn-outline-teal" data-bs-toggle="modal" data-bs-target="#editUserModal{{ $u->id }}">
                                         <i class="bi bi-pencil me-1"></i> Hariri
                                     </button>
@@ -115,6 +118,54 @@
                                 </div>
                             </td>
                         </tr>
+
+                        <!-- Reset Password Modal -->
+                        <div class="modal fade" id="resetPasswordModal{{ $u->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow text-start">
+                                    <form action="{{ route('users.reset-password', $u) }}" method="POST">
+                                        @csrf
+                                        <div class="modal-header bg-warning text-dark">
+                                            <h5 class="modal-title fw-bold"><i class="bi bi-key-fill me-2"></i>Badilisha Nenosiri: {{ $u->name }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body p-4 text-start">
+                                            <div class="alert alert-light border small text-muted mb-3">
+                                                <i class="bi bi-shield-lock-fill me-1 text-teal"></i>
+                                                Kama Msimamizi Mkuu, unaweza kuweka nenosiri jipya kwa mfanyakazi <strong>{{ $u->name }}</strong> (<code>{{ $u->username }}</code>).
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Nenosiri Jipya <span class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <input type="password" name="password" id="newPass{{ $u->id }}" class="form-control" placeholder="Angalau tarakimu/herufi 6" minlength="6" required>
+                                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassField('newPass{{ $u->id }}')">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Thibitisha Nenosiri Jipya <span class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <input type="password" name="password_confirmation" id="confPass{{ $u->id }}" class="form-control" placeholder="Rudia nenosiri jipya" minlength="6" required>
+                                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassField('confPass{{ $u->id }}')">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="pt-1">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="generateAutoPass('newPass{{ $u->id }}', 'confPass{{ $u->id }}')">
+                                                    <i class="bi bi-magic me-1 text-warning"></i> Tengeneza Nenosiri Nguvu Kiotomatiki
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer bg-light">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ghairi</button>
+                                            <button type="submit" class="btn btn-warning fw-bold text-dark"><i class="bi bi-check-circle me-1"></i> Sasisha Nenosiri</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Delete User Modal -->
                         @if($u->id !== auth()->id())
@@ -260,4 +311,32 @@
         </div>
     </div>
 </div>
+
+@section('scripts')
+<script>
+    function togglePassField(fieldId) {
+        const inp = document.getElementById(fieldId);
+        if (inp) {
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+        }
+    }
+
+    function generateAutoPass(newId, confId) {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$';
+        let pass = '';
+        for (let i = 0; i < 9; i++) {
+            pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        const f1 = document.getElementById(newId);
+        const f2 = document.getElementById(confId);
+        if (f1 && f2) {
+            f1.value = pass;
+            f1.type = 'text';
+            f2.value = pass;
+            f2.type = 'text';
+            alert('Nenosiri jipya lililotengenezwa ni:\n\n' + pass + '\n\nUnaweza kulinakili (copy) na kumpatia mfanyakazi.');
+        }
+    }
+</script>
+@endsection
 @endsection

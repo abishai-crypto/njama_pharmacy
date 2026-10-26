@@ -89,6 +89,29 @@ class UserController extends Controller
         return back()->with('success', 'Taarifa za mfanyakazi zimesasishwa.');
     }
 
+    public function resetPassword(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user->password = Hash::make($validated['password']);
+        $user->save();
+
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'user_password_reset',
+            'description' => "Admin amebadilisha nenosiri la mfanyakazi: {$user->name} ({$user->username})",
+            'entity_type' => 'User',
+            'entity_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
+
+        return back()->with('success', "Nenosiri jipya la mfanyakazi '{$user->name}' limewekwa kikamilifu.");
+    }
+
     public function destroy(Request $request, User $user)
     {
         if ($user->id === auth()->id()) {
