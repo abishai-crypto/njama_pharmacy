@@ -26,6 +26,7 @@
             </div>
 
             <div class="row g-3 text-center border-top pt-3">
+                @if(auth()->user()->canAccessFinancials())
                 <div class="col-sm-3 border-end">
                     <span class="text-muted small fw-bold text-uppercase">Selling Price</span>
                     <h5 class="fw-bold mb-0 text-success">Tsh {{ number_format($product->selling_price) }}</h5>
@@ -42,6 +43,16 @@
                     <span class="text-muted small fw-bold text-uppercase">Gross Profit / Unit</span>
                     <h5 class="fw-bold mb-0 text-primary">Tsh {{ number_format($product->selling_price - $product->purchase_cost) }}</h5>
                 </div>
+                @else
+                <div class="col-sm-6 border-end">
+                    <span class="text-muted small fw-bold text-uppercase">Selling Price</span>
+                    <h5 class="fw-bold mb-0 text-success">Tsh {{ number_format($product->selling_price) }}</h5>
+                </div>
+                <div class="col-sm-6">
+                    <span class="text-muted small fw-bold text-uppercase">Sellable Stock</span>
+                    <h5 class="fw-bold mb-0 text-emerald">{{ $product->total_stock }} {{ $product->unit ? $product->unit->code : '' }}</h5>
+                </div>
+                @endif
             </div>
         </div>
 
@@ -59,7 +70,9 @@
                             <th>Expiry Date</th>
                             <th>Received Qty</th>
                             <th>Remaining Qty</th>
+                            @if(auth()->user()->canAccessFinancials())
                             <th>Cost</th>
+                            @endif
                             <th class="text-center">Status</th>
                             <th class="text-center">Action</th>
                         </tr>
@@ -88,7 +101,9 @@
                             </td>
                             <td>{{ $batch->quantity_received }}</td>
                             <td class="fw-bold fs-6">{{ $batch->quantity_remaining }}</td>
+                            @if(auth()->user()->canAccessFinancials())
                             <td>Tsh {{ number_format($batch->purchase_cost) }}</td>
+                            @endif
                             <td class="text-center">
                                 @if($batch->status === 'active')
                                     <span class="badge bg-success-subtle text-success">Active</span>
@@ -113,7 +128,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">Hakuna batch yoyote iliyosajiliwa bado.</td>
+                            <td colspan="{{ auth()->user()->canAccessFinancials() ? 7 : 6 }}" class="text-center py-4 text-muted">Hakuna batch yoyote iliyosajiliwa bado.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -133,7 +148,9 @@
                         <tr>
                             <th>Date & Time</th>
                             <th>Changed By</th>
+                            @if(auth()->user()->canAccessFinancials())
                             <th>Purchase Cost</th>
+                            @endif
                             <th>Selling Price</th>
                             <th>Reason</th>
                         </tr>
@@ -143,10 +160,12 @@
                         <tr>
                             <td class="small">{{ $ph->created_at->format('d/m/Y H:i') }}</td>
                             <td>{{ $ph->user ? $ph->user->name : 'System' }}</td>
+                            @if(auth()->user()->canAccessFinancials())
                             <td>
                                 Tsh {{ number_format($ph->old_purchase_cost) }} &rarr; 
                                 <strong class="text-dark">Tsh {{ number_format($ph->new_purchase_cost) }}</strong>
                             </td>
+                            @endif
                             <td>
                                 Tsh {{ number_format($ph->old_selling_price) }} &rarr; 
                                 <strong class="text-success">Tsh {{ number_format($ph->new_selling_price) }}</strong>
@@ -155,7 +174,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">No price adjustments recorded yet.</td>
+                            <td colspan="{{ auth()->user()->canAccessFinancials() ? 5 : 4 }}" class="text-center py-4 text-muted">No price adjustments recorded yet.</td>
                         </tr>
                         @endforelse
                     </tbody>

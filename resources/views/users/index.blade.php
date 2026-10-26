@@ -103,11 +103,43 @@
                                 @endif
                             </td>
                             <td class="text-end pe-4">
-                                <button class="btn btn-sm btn-outline-teal" data-bs-toggle="modal" data-bs-target="#editUserModal{{ $u->id }}">
-                                    <i class="bi bi-pencil me-1"></i> Hariri
-                                </button>
+                                <div class="d-inline-flex gap-1">
+                                    <button class="btn btn-sm btn-outline-teal" data-bs-toggle="modal" data-bs-target="#editUserModal{{ $u->id }}">
+                                        <i class="bi bi-pencil me-1"></i> Hariri
+                                    </button>
+                                    @if($u->id !== auth()->id())
+                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ $u->id }}" title="Futa Mfanyakazi">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
+
+                        <!-- Delete User Modal -->
+                        @if($u->id !== auth()->id())
+                        <div class="modal fade" id="deleteUserModal{{ $u->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow">
+                                    <form action="{{ route('users.destroy', $u) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <div class="modal-body p-4 text-center">
+                                            <div class="text-danger mb-3" style="font-size: 2.8rem;">
+                                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                            </div>
+                                            <h5 class="fw-bold text-dark mb-2">Thibitisha Kufuta Mfanyakazi</h5>
+                                            <p class="text-muted small mb-0">Je, una uhakika unataka kumfuta kabisa <strong>{{ $u->name }}</strong> (<code>{{ $u->username }}</code>) kutoka kwenye mfumo?</p>
+                                        </div>
+                                        <div class="modal-footer bg-light justify-content-center border-0 pt-0 pb-3">
+                                            <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Ghairi</button>
+                                            <button type="submit" class="btn btn-danger px-4"><i class="bi bi-trash me-1"></i> Ndiyo, Futa</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
 
                         <!-- Edit User Modal -->
                         <div class="modal fade" id="editUserModal{{ $u->id }}" tabindex="-1">
@@ -145,7 +177,6 @@
                                                     <option value="admin" {{ $u->role === 'admin' ? 'selected' : '' }}>Msimamizi Mkuu (Admin)</option>
                                                     <option value="pharmacist" {{ $u->role === 'pharmacist' ? 'selected' : '' }}>Mfamasia (Pharmacist)</option>
                                                     <option value="cashier" {{ $u->role === 'cashier' ? 'selected' : '' }}>Muuzaji (Cashier)</option>
-                                                    <option value="inventory_officer" {{ $u->role === 'inventory_officer' ? 'selected' : '' }}>Afisa Stoo (Inventory)</option>
                                                     <option value="auditor" {{ $u->role === 'auditor' ? 'selected' : '' }}>Mkaguzi wa Ndani (Auditor)</option>
                                                 </select>
                                             </div>
@@ -212,7 +243,6 @@
                         <select name="role" class="form-select" required>
                             <option value="cashier" selected>Muuzaji (Cashier)</option>
                             <option value="pharmacist">Mfamasia (Pharmacist)</option>
-                            <option value="inventory_officer">Afisa Stoo (Inventory)</option>
                             <option value="auditor">Mkaguzi wa Hesabu (Auditor)</option>
                             <option value="admin">Msimamizi Mkuu (Admin)</option>
                         </select>

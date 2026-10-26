@@ -282,7 +282,7 @@
                 <span>{{ __('app.medicines') }}</span>
             </a>
 
-            @if(auth()->user()->isAdmin() || auth()->user()->isPharmacist() || auth()->user()->isInventoryOfficer())
+            @if(auth()->user()->isAdmin())
             <a href="{{ route('products.bulk-prices') }}" class="sidebar-link {{ request()->is('products-bulk-prices*') ? 'active' : '' }}">
                 <i class="bi bi-tags-fill"></i>
                 <span>Bulk Selling Prices</span>

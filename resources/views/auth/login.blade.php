@@ -35,7 +35,7 @@
                     <label class="form-label fw-semibold small">Username or Email</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-fill text-muted"></i></span>
-                        <input type="text" name="login" class="form-control border-start-0 ps-0" placeholder="e.g. dr.njama or admin@njamapharmacy.co.tz" value="{{ old('login', 'dr.njama') }}" required autofocus>
+                        <input type="text" name="login" class="form-control border-start-0 ps-0" placeholder="e.g. username or email" value="{{ old('login') }}" required autofocus>
                     </div>
                 </div>
 
@@ -45,7 +45,7 @@
                     </div>
                     <div class="input-group mt-1">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock-fill text-muted"></i></span>
-                        <input type="password" name="password" id="passwordInput" class="form-control border-start-0 ps-0" placeholder="••••••••" value="Admin@12345" required>
+                        <input type="password" name="password" id="passwordInput" class="form-control border-start-0 ps-0" placeholder="••••••••" required>
                         <button class="btn btn-outline-secondary" type="button" onclick="togglePass()">
                             <i class="bi bi-eye" id="passIcon"></i>
                         </button>
@@ -63,18 +63,6 @@
                     <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to NJAMA PHARMACY
                 </button>
             </form>
-
-            <!-- Quick Demo Accounts Switcher -->
-            <div class="mt-4 pt-3 border-top">
-                <div class="small fw-bold text-muted mb-2 text-uppercase" style="font-size: 0.68rem; letter-spacing: 0.5px;">Quick System Accounts:</div>
-                <div class="d-flex flex-wrap gap-1">
-                    <button type="button" class="btn btn-xs btn-outline-secondary py-1 px-2" style="font-size: 0.75rem;" onclick="fillLogin('dr.njama', 'Admin@12345')">Dr. Njama (Owner)</button>
-                    <button type="button" class="btn btn-xs btn-outline-secondary py-1 px-2" style="font-size: 0.75rem;" onclick="fillLogin('abishai', 'Admin@12345')">Abishai (Tech)</button>
-                    <button type="button" class="btn btn-xs btn-outline-secondary py-1 px-2" style="font-size: 0.75rem;" onclick="fillLogin('cashier', 'Cash@12345')">Cashier</button>
-                    <button type="button" class="btn btn-xs btn-outline-secondary py-1 px-2" style="font-size: 0.75rem;" onclick="fillLogin('pharmacist', 'Pharm@12345')">Pharmacist</button>
-                    <button type="button" class="btn btn-xs btn-outline-secondary py-1 px-2" style="font-size: 0.75rem;" onclick="fillLogin('inventory', 'Store@12345')">Storekeeper</button>
-                </div>
-            </div>
 
             <div class="mt-4 text-center text-muted" style="font-size: 0.75rem;">
                 Emergency Tech Support: <strong>0656392400 (Abishai Evaristo)</strong>
@@ -96,11 +84,6 @@
             icon.classList.remove('bi-eye-slash');
             icon.classList.add('bi-eye');
         }
-    }
-
-    function fillLogin(u, p) {
-        document.querySelector('input[name="login"]').value = u;
-        document.querySelector('input[name="password"]').value = p;
     }
 </script>
 @endsection

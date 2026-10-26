@@ -58,22 +58,18 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Medicines Catalogue & Inventory
-    Route::middleware(['role:admin,pharmacist,inventory_officer,auditor'])->group(function () {
+    Route::middleware(['role:admin,pharmacist,auditor'])->group(function () {
         Route::get('/products', [ProductController::class, 'index'])->name('products.index');
         Route::get('/products/show/{product}', [ProductController::class, 'show'])->name('products.show');
         Route::get('/inventory/movements', [BatchController::class, 'movements'])->name('batches.movements');
         Route::get('/batches', [BatchController::class, 'index'])->name('batches.index');
     });
 
-    Route::middleware(['role:admin,pharmacist,inventory_officer'])->group(function () {
+    Route::middleware(['role:admin,pharmacist'])->group(function () {
         Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
         Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-
-        // Bulk Price Updater
-        Route::get('/products-bulk-prices', [ProductController::class, 'bulkPriceUpdater'])->name('products.bulk-prices');
-        Route::post('/products-bulk-prices', [ProductController::class, 'saveBulkPrices'])->name('products.save-bulk-prices');
 
         // Batch Actions: Quarantine, Write-off
         Route::post('/batches/{batch}/quarantine', [BatchController::class, 'quarantine'])->name('batches.quarantine');
@@ -81,14 +77,14 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Purchases & Suppliers
-    Route::middleware(['role:admin,inventory_officer,pharmacist,auditor'])->group(function () {
+    Route::middleware(['role:admin,pharmacist,auditor'])->group(function () {
         Route::get('/purchases', [PurchaseController::class, 'index'])->name('purchases.index');
         Route::get('/purchases/{purchase}', [PurchaseController::class, 'show'])->name('purchases.show');
         Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
         Route::get('/suppliers/{supplier}', [SupplierController::class, 'show'])->name('suppliers.show');
     });
 
-    Route::middleware(['role:admin,inventory_officer'])->group(function () {
+    Route::middleware(['role:admin,pharmacist'])->group(function () {
         Route::get('/purchase/new', [PurchaseController::class, 'create'])->name('purchases.create');
         Route::post('/purchases', [PurchaseController::class, 'store'])->name('purchases.store');
         Route::post('/purchases/{purchase}/payment', [PurchaseController::class, 'recordPayment'])->name('purchases.payment');
@@ -119,14 +115,22 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/reports/expiry', [ReportController::class, 'expiryReport'])->name('reports.expiry');
     });
 
-    // Administration, Staff, Settings, Audit Logs, and Backups (Admin Only)
+    // Administration, Staff, Settings, Bulk Prices, Sales Deletion, Audit Logs, and Backups (Admin Only)
     Route::middleware(['role:admin'])->group(function () {
+        // Bulk Selling Price Updater (Admin Only)
+        Route::get('/products-bulk-prices', [ProductController::class, 'bulkPriceUpdater'])->name('products.bulk-prices');
+        Route::post('/products-bulk-prices', [ProductController::class, 'saveBulkPrices'])->name('products.save-bulk-prices');
+
+        // Delete Sales (Admin Only)
+        Route::delete('/sales/{sale}', [PosController::class, 'destroySale'])->name('sales.destroy');
+
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
 
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index');
 

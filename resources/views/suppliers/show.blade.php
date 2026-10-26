@@ -12,7 +12,7 @@
             <h3 class="fw-bold mb-0 text-dark"><i class="bi bi-building text-teal me-2"></i>{{ $supplier->name }}</h3>
         </div>
         <div class="d-flex gap-2">
-            @if(in_array(auth()->user()->role, ['admin', 'inventory_officer']))
+            @if(in_array(auth()->user()->role, ['admin', 'pharmacist']))
             <a href="{{ route('purchases.create') }}?supplier_id={{ $supplier->id }}" class="btn btn-teal shadow-sm">
                 <i class="bi bi-cart-plus me-1"></i> Ankara Mpya ya Manunuzi
             </a>

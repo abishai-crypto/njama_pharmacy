@@ -48,15 +48,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('Cash@12345'),
             ],
             [
-                'name' => 'Store & Inventory Officer',
-                'username' => 'inventory',
-                'email' => 'inventory@njamapharmacy.co.tz',
-                'phone' => '0712000003',
-                'role' => 'inventory_officer',
-                'is_active' => true,
-                'password' => Hash::make('Store@12345'),
-            ],
-            [
                 'name' => 'Financial Auditor',
                 'username' => 'auditor',
                 'email' => 'auditor@njamapharmacy.co.tz',

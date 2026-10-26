@@ -78,7 +78,6 @@
 | **Abishai Evaristo** | `abishai` | `Admin@12345` | `admin` | Mhandisi wa Mifumo |
 | **Mfamasia Mkuu** | `pharmacist` | `Pharm@12345` | `pharmacist` | Dawa, POS & Dispensing |
 | **Cashier / Muuzaji** | `cashier` | `Cash@12345` | `cashier` | Dirisha la Mauzo (POS) |
-| **Afisa Stoo** | `inventory` | `Store@12345` | `inventory_officer` | Mapokezi na Stoo |
 | **Mkaguzi wa Hesabu** | `auditor` | `Audit@12345` | `auditor` | Ukaguzi wa Vitabu & Ripoti |
 
 ---

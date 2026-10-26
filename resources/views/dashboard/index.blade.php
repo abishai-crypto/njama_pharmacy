@@ -4,6 +4,19 @@
 @section('page_title', __('app.dashboard'))
 
 @section('content')
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
 <!-- Date Filter Bar -->
 <div class="card card-custom p-3 mb-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -79,7 +92,8 @@
     @endif
 </div>
 
-<!-- Primary Financial KPIs (6 Metrics) -->
+<!-- Primary KPIs -->
+@if(auth()->user()->canAccessFinancials())
 <div class="row g-3 mb-4">
     <!-- Total Sales -->
     <div class="col-sm-6 col-xl-4 col-xxl-2">
@@ -169,6 +183,59 @@
         </div>
     </div>
 </div>
+@else
+<!-- Operational KPIs for Non-Financial Staff (Pharmacist & Cashier) -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-custom p-3 h-100 border-start border-teal border-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small fw-bold text-uppercase">Sales Revenue</span>
+                <div class="metric-icon-bubble" style="background-color: #ecfdf5; color: #0d9488;">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+            </div>
+            <h4 class="fw-bold mb-1 text-teal">Tsh {{ number_format($totalSales) }}</h4>
+            <small class="text-muted">{{ $transactionsCount }} completed transactions</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-custom p-3 h-100 border-start border-primary border-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small fw-bold text-uppercase">Completed Sales</span>
+                <div class="metric-icon-bubble" style="background-color: #eff6ff; color: #3b82f6;">
+                    <i class="bi bi-receipt"></i>
+                </div>
+            </div>
+            <h4 class="fw-bold mb-1 text-primary">{{ $transactionsCount }}</h4>
+            <small class="text-muted">Receipts issued today</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-custom p-3 h-100 border-start border-warning border-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small fw-bold text-uppercase">Expiring in &lt;90 Days</span>
+                <div class="metric-icon-bubble" style="background-color: #fffbeb; color: #d97706;">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+            </div>
+            <h4 class="fw-bold mb-1 text-warning">{{ $expiringSoonCount }} Batches</h4>
+            <small class="text-muted">Requires FEFO prioritization</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card card-custom p-3 h-100 border-start border-danger border-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small fw-bold text-uppercase">Low Stock Alert</span>
+                <div class="metric-icon-bubble" style="background-color: #fef2f2; color: #ef4444;">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+            </div>
+            <h4 class="fw-bold mb-1 text-danger">{{ $lowStockProducts->count() }} Medicines</h4>
+            <small class="text-muted">At or below minimum stock</small>
+        </div>
+    </div>
+</div>
+@endif
 
 <!-- Charts & Fast Actions Row -->
 <div class="row g-4 mb-4">
@@ -176,7 +243,10 @@
     <div class="col-lg-8">
         <div class="card card-custom p-4 h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold mb-0"><i class="bi bi-activity text-emerald me-2"></i>7-Day Sales & Gross Profit Performance</h6>
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-activity text-emerald me-2"></i>
+                    {{ auth()->user()->canAccessFinancials() ? '7-Day Sales & Gross Profit Performance' : '7-Day Sales Performance' }}
+                </h6>
                 <span class="badge bg-light text-dark border">TZS Currency</span>
             </div>
             <div style="height: 280px;">
@@ -197,10 +267,12 @@
             <div class="mt-auto pt-3 border-top">
                 <div class="small fw-bold text-muted text-uppercase mb-2">Quick Navigation:</div>
                 <div class="d-grid gap-2">
+                    @if(auth()->user()->isAdmin())
                     <a href="{{ route('products.bulk-prices') }}" class="btn btn-outline-secondary btn-sm text-start d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-tags-fill me-2 text-warning"></i>Update Medicine Selling Prices</span>
                         <i class="bi bi-chevron-right text-muted"></i>
                     </a>
+                    @endif
                     <a href="{{ route('purchases.create') }}" class="btn btn-outline-secondary btn-sm text-start d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-truck me-2 text-info"></i>Receive Supplier Delivery</span>
                         <i class="bi bi-chevron-right text-muted"></i>
@@ -222,7 +294,9 @@
         <div class="card card-custom overflow-hidden">
             <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
                 <h6 class="fw-bold mb-0"><i class="bi bi-receipt text-emerald me-2"></i>Recent Sales Transactions</h6>
+                @if(auth()->user()->canAccessFinancials())
                 <a href="{{ route('reports.sales') }}" class="small text-decoration-none fw-semibold">View All &rarr;</a>
+                @endif
             </div>
             <div class="table-responsive">
                 <table class="table table-custom">
@@ -233,7 +307,7 @@
                             <th>Cashier</th>
                             <th>Payment</th>
                             <th class="text-end">Amount</th>
-                            <th class="text-center">Receipt</th>
+                            <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -249,11 +323,46 @@
                             </td>
                             <td class="text-end fw-bold text-emerald">Tsh {{ number_format($sale->total_amount) }}</td>
                             <td class="text-center">
-                                <a href="{{ route('pos.receipt', $sale->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Print Receipt">
-                                    <i class="bi bi-printer"></i>
-                                </a>
+                                <div class="d-inline-flex gap-1">
+                                    <a href="{{ route('pos.receipt', $sale->id) }}" target="_blank" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Print Receipt">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                    @if(auth()->user()->isAdmin())
+                                    <button class="btn btn-sm btn-outline-danger py-0 px-2" data-bs-toggle="modal" data-bs-target="#deleteRecentSaleModal{{ $sale->id }}" title="Futa Mauzo">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
+
+                        @if(auth()->user()->isAdmin())
+                        <!-- Delete Recent Sale Modal -->
+                        <div class="modal fade" id="deleteRecentSaleModal{{ $sale->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow text-start">
+                                    <form action="{{ route('sales.destroy', $sale) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <div class="modal-body p-4 text-center">
+                                            <div class="text-danger mb-3" style="font-size: 2.5rem;">
+                                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                            </div>
+                                            <h5 class="fw-bold text-dark mb-2">Thibitisha Kufuta Mauzo</h5>
+                                            <p class="text-muted small mb-2">Je, una uhakika unataka kufuta kabisa muamala wa mauzo ya ankara <strong>{{ $sale->invoice_number }}</strong> ya thamani ya <strong>Tsh {{ number_format($sale->total_amount) }}</strong>?</p>
+                                            <div class="alert alert-warning py-2 px-3 small text-start mb-0">
+                                                <i class="bi bi-info-circle-fill me-1"></i> Dawa zote zilizouzwa kwenye muamala huu zitarudishwa moja kwa moja kwenye stoo (Restock).
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer bg-light justify-content-center border-0 pt-0 pb-3">
+                                            <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Ghairi</button>
+                                            <button type="submit" class="btn btn-danger px-4"><i class="bi bi-trash me-1"></i> Ndiyo, Futa Mauzo</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                         @empty
                         <tr>
                             <td colspan="6" class="text-center py-4 text-muted">No sales recorded yet for this period. Open POS to make first sale!</td>
@@ -323,12 +432,14 @@
                     backgroundColor: 'rgba(13, 148, 136, 0.85)',
                     borderRadius: 6,
                 },
+                @if(auth()->user()->canAccessFinancials())
                 {
                     label: 'Gross Profit (TZS)',
                     data: {!! json_encode($chartProfit) !!},
                     backgroundColor: 'rgba(34, 197, 94, 0.85)',
                     borderRadius: 6,
                 }
+                @endif
             ]
         },
         options: {

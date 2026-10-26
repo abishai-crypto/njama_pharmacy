@@ -19,6 +19,19 @@
         </div>
     </div>
 
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <!-- Filter Card -->
     <div class="card card-custom border-0 shadow-sm mb-4">
         <div class="card-body">
@@ -105,7 +118,7 @@
                             <th class="text-end">Jumla (TZS)</th>
                             <th class="text-end">COGS (TZS)</th>
                             <th class="text-end">Faida (TZS)</th>
-                            <th class="text-end pe-4">Risiti</th>
+                            <th class="text-end pe-4">Vitendo</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -128,14 +141,49 @@
                             <td class="text-end text-muted">Tsh {{ number_format($sale->cost_of_goods_sold) }}</td>
                             <td class="text-end fw-bold text-success">Tsh {{ number_format($sale->gross_profit) }}</td>
                             <td class="text-end pe-4">
-                                <a href="{{ route('pos.receipt', $sale) }}" class="btn btn-sm btn-outline-teal" target="_blank" title="Thermal Print">
-                                    <i class="bi bi-printer"></i>
-                                </a>
-                                <a href="{{ route('pos.digital-receipt', $sale) }}" class="btn btn-sm btn-outline-secondary" target="_blank" title="Digital PDF">
-                                    <i class="bi bi-file-text"></i>
-                                </a>
+                                <div class="d-inline-flex gap-1">
+                                    <a href="{{ route('pos.receipt', $sale) }}" class="btn btn-sm btn-outline-teal" target="_blank" title="Thermal Print">
+                                        <i class="bi bi-printer"></i>
+                                    </a>
+                                    <a href="{{ route('pos.digital-receipt', $sale) }}" class="btn btn-sm btn-outline-secondary" target="_blank" title="Digital PDF">
+                                        <i class="bi bi-file-text"></i>
+                                    </a>
+                                    @if(auth()->user()->isAdmin())
+                                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteSaleModal{{ $sale->id }}" title="Futa Mauzo">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
+
+                        @if(auth()->user()->isAdmin())
+                        <!-- Delete Sale Modal -->
+                        <div class="modal fade" id="deleteSaleModal{{ $sale->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow">
+                                    <form action="{{ route('sales.destroy', $sale) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <div class="modal-body p-4 text-center">
+                                            <div class="text-danger mb-3" style="font-size: 2.8rem;">
+                                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                            </div>
+                                            <h5 class="fw-bold text-dark mb-2">Thibitisha Kufuta Mauzo</h5>
+                                            <p class="text-muted small mb-2">Je, una uhakika unataka kufuta kabisa muamala wa mauzo ya ankara <strong>{{ $sale->invoice_number }}</strong> ya thamani ya <strong>Tsh {{ number_format($sale->total_amount) }}</strong>?</p>
+                                            <div class="alert alert-warning py-2 px-3 small text-start mb-0">
+                                                <i class="bi bi-info-circle-fill me-1"></i> Dawa zote zilizouzwa kwenye muamala huu zitarudishwa moja kwa moja kwenye stoo (Restock).
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer bg-light justify-content-center border-0 pt-0 pb-3">
+                                            <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Ghairi</button>
+                                            <button type="submit" class="btn btn-danger px-4"><i class="bi bi-trash me-1"></i> Ndiyo, Futa Mauzo</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                         @empty
                         <tr>
                             <td colspan="9" class="text-center py-5 text-muted">

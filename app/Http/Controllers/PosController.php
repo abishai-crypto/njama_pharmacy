@@ -447,4 +447,81 @@ class PosController extends Controller
             'results' => $results,
         ]);
     }
+
+    /**
+     * Delete/Void an existing sale (Admin Only)
+     * Restocks items back to batches, updates shift totals, logs audit trail
+     */
+    public function destroySale(Request $request, Sale $sale)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Ni Msimamizi Mkuu (Admin) pekee anayeruhusiwa kufuta mauzo.');
+        }
+
+        $invoiceNumber = $sale->invoice_number;
+        $totalAmount = (float) $sale->total_amount;
+
+        DB::transaction(function () use ($sale, $request, $invoiceNumber, $totalAmount) {
+            $sale->load(['items.batchAllocations', 'items.product']);
+
+            // 1. Restock items back to original batches
+            foreach ($sale->items as $item) {
+                foreach ($item->batchAllocations as $alloc) {
+                    $batch = InventoryBatch::find($alloc->batch_id);
+                    if ($batch) {
+                        $batch->quantity_remaining += (float) $alloc->quantity;
+                        if ($batch->status === 'depleted' && $batch->quantity_remaining > 0) {
+                            $batch->status = 'active';
+                        }
+                        $batch->save();
+
+                        // Record restocking inventory movement
+                        InventoryMovement::create([
+                            'product_id' => $item->product_id,
+                            'batch_id' => $batch->id,
+                            'movement_type' => 'sale_return',
+                            'quantity' => (float) $alloc->quantity,
+                            'balance_after' => (float) $batch->quantity_remaining,
+                            'unit_cost' => (float) $alloc->unit_cost,
+                            'reference_type' => 'Sale Void/Delete',
+                            'reference_id' => $invoiceNumber,
+                            'notes' => "Mauzo ya ankara #{$invoiceNumber} yamefutwa na Admin - Dawa zimerudishwa stoo",
+                            'user_id' => auth()->id(),
+                            'created_at' => now(),
+                        ]);
+                    }
+                }
+            }
+
+            // 2. Adjust cashier shift if tied to one
+            if ($sale->shift_id) {
+                $shift = CashierShift::find($sale->shift_id);
+                if ($shift) {
+                    $shift->total_sales_amount = max(0, (float) $shift->total_sales_amount - $totalAmount);
+                    $shift->total_transactions_count = max(0, (int) $shift->total_transactions_count - 1);
+                    $shift->save();
+                }
+            }
+
+            // 3. Remove dispensing records tied to this sale (if any)
+            DispensingRecord::where('sale_id', $sale->id)->delete();
+
+            // 4. Delete the sale (cascades to sale_items, sale_item_batch_allocations, payments)
+            $sale->delete();
+
+            // 5. Audit trail
+            AuditLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'sale_deleted',
+                'description' => "Admin amefuta mauzo ya risiti {$invoiceNumber} ya thamani ya Tsh " . number_format($totalAmount) . " na kurudisha dawa stoo.",
+                'entity_type' => 'Sale',
+                'entity_id' => null,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'created_at' => now(),
+            ]);
+        });
+
+        return back()->with('success', "Mauzo ya risiti/ankara '{$invoiceNumber}' yamefutwa na dawa zimerudishwa stoo kikamilifu.");
+    }
 }

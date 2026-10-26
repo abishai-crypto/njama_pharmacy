@@ -42,7 +42,7 @@
                     @endif
                 </td>
                 <td class="text-end pe-4">
-                    @if(in_array(auth()->user()->role, ['admin', 'inventory_officer', 'pharmacist']))
+                    @if(in_array(auth()->user()->role, ['admin', 'pharmacist']))
                         <div class="btn-group">
                             @if($batch->status === 'active')
                             <form action="{{ route('batches.quarantine', $batch) }}" method="POST" class="d-inline">

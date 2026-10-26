@@ -22,7 +22,7 @@ class UserController extends Controller
             'username' => 'required|string|max:50|unique:users,username',
             'email' => 'required|email|max:255|unique:users,email',
             'phone' => 'nullable|string|max:50',
-            'role' => 'required|in:admin,pharmacist,cashier,inventory_officer,auditor',
+            'role' => 'required|in:admin,pharmacist,cashier,auditor',
             'password' => 'required|string|min:6',
         ]);
 
@@ -57,7 +57,7 @@ class UserController extends Controller
             'username' => 'required|string|max:50|unique:users,username,' . $user->id,
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:50',
-            'role' => 'required|in:admin,pharmacist,cashier,inventory_officer,auditor',
+            'role' => 'required|in:admin,pharmacist,cashier,auditor',
             'is_active' => 'boolean',
             'password' => 'nullable|string|min:6',
         ]);
@@ -87,5 +87,32 @@ class UserController extends Controller
         ]);
 
         return back()->with('success', 'Taarifa za mfanyakazi zimesasishwa.');
+    }
+
+    public function destroy(Request $request, User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Huwezi kufuta akaunti unayoitumia kwa sasa.');
+        }
+
+        if ($user->isAdmin() && User::where('role', 'admin')->count() <= 1) {
+            return back()->with('error', 'Hauwezi kufuta Msimamizi Mkuu wa pekee aliyebaki kwenye mfumo.');
+        }
+
+        $name = $user->name;
+        $user->delete();
+
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'user_deleted',
+            'description' => "Deleted staff account for {$name}",
+            'entity_type' => 'User',
+            'entity_id' => null,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
+
+        return back()->with('success', "Mfanyakazi '{$name}' amefutwa kikamilifu kwenye mfumo.");
     }
 }

@@ -9,7 +9,7 @@
             <h3 class="fw-bold mb-1"><i class="bi bi-truck text-teal me-2"></i>{{ __('app.suppliers') }}</h3>
             <p class="text-muted small mb-0">Usimamizi wa wasambazaji wa dawa, ankara, na malipo ya jumla</p>
         </div>
-        @if(in_array(auth()->user()->role, ['admin', 'inventory_officer']))
+        @if(in_array(auth()->user()->role, ['admin', 'pharmacist']))
         <button class="btn btn-teal shadow-sm" data-bs-toggle="modal" data-bs-target="#addSupplierModal">
             <i class="bi bi-plus-circle me-1"></i> Sajili Msambazaji Mpya
         </button>
@@ -69,7 +69,7 @@
                                 <a href="{{ route('suppliers.show', $supplier) }}" class="btn btn-sm btn-outline-teal me-1" title="Tazama Taarifa na Ankara">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                @if(in_array(auth()->user()->role, ['admin', 'inventory_officer']))
+                                @if(in_array(auth()->user()->role, ['admin', 'pharmacist']))
                                 <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editSupplierModal{{ $supplier->id }}" title="Hariri">
                                     <i class="bi bi-pencil"></i>
                                 </button>

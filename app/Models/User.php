@@ -51,7 +51,7 @@ class User extends Authenticatable
 
     public function isInventoryOfficer(): bool
     {
-        return in_array($this->role, ['admin', 'inventory_officer', 'pharmacist']);
+        return in_array($this->role, ['admin', 'pharmacist']);
     }
 
     public function isAuditor(): bool

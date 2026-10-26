@@ -60,7 +60,9 @@
                     <th>Jina la Dawa (Generic & Brand)</th>
                     <th>Kundi (Category)</th>
                     <th class="text-center">Kipimo</th>
+                    @if(auth()->user()->canAccessFinancials())
                     <th class="text-end">Bei ya Kununua</th>
+                    @endif
                     <th class="text-end">Bei ya Kuuzia</th>
                     <th class="text-center">Stoo Iliyopo</th>
                     <th class="text-center">Hali</th>
@@ -89,7 +91,9 @@
                         <span class="badge bg-light text-dark border">{{ $product->category ? $product->category->name : 'N/A' }}</span>
                     </td>
                     <td class="text-center">{{ $product->unit ? $product->unit->code : 'PCS' }}</td>
+                    @if(auth()->user()->canAccessFinancials())
                     <td class="text-end text-secondary">Tsh {{ number_format($product->purchase_cost) }}</td>
+                    @endif
                     <td class="text-end fw-bold text-emerald">Tsh {{ number_format($product->selling_price) }}</td>
                     <td class="text-center">
                         @php $stock = $product->total_stock; @endphp
@@ -117,7 +121,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="text-center py-5 text-muted">
+                    <td colspan="{{ auth()->user()->canAccessFinancials() ? 9 : 8 }}" class="text-center py-5 text-muted">
                         Hakuna dawa iliyopatikana kwa vigezo hivyo.
                     </td>
                 </tr>
