@@ -105,13 +105,15 @@ class RealMedicineInventorySeeder extends Seeder
                 ]
             );
 
-            // Record Batch
-            $batch = InventoryBatch::updateOrCreate(
-                [
+            // Record Batch: Only set initial quantity_remaining if batch does not already exist
+            $existingBatch = InventoryBatch::where('product_id', $product->id)
+                ->where('batch_number', $item['batch'])
+                ->first();
+
+            if (!$existingBatch) {
+                $batch = InventoryBatch::create([
                     'product_id' => $product->id,
                     'batch_number' => $item['batch'],
-                ],
-                [
                     'supplier_id' => $supplier->id,
                     'purchase_id' => $purchase->id,
                     'quantity_received' => $item['qty'],
@@ -123,8 +125,17 @@ class RealMedicineInventorySeeder extends Seeder
                     'storage_location' => 'Main Pharmacy Shelf',
                     'status' => 'active',
                     'created_by' => $adminId,
-                ]
-            );
+                ]);
+            } else {
+                $existingBatch->update([
+                    'supplier_id' => $supplier->id,
+                    'purchase_id' => $purchase->id,
+                    'purchase_cost' => $item['cost'],
+                    'selling_price' => $item['selling'],
+                    'expiry_date' => $item['expiry'],
+                ]);
+                $batch = $existingBatch;
+            }
 
             // Record Movement ledger if not already recorded or update
             $existingMovement = InventoryMovement::where('product_id', $product->id)

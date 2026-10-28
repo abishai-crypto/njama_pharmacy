@@ -56,12 +56,20 @@ fi
 # Storage symlink
 php artisan storage:link --force || true
 
-# Run database migrations and seeders automatically
+# Run database migrations automatically
 echo "==> Running database migrations..."
 php artisan migrate --force || true
 
-echo "==> Seeding initial data (if needed)..."
-php artisan db:seed --force || true
+# Seed ONLY if database is brand new (no users exist)
+echo "==> Checking if initial database seeding is required..."
+USER_COUNT=$(php -r "require 'vendor/autoload.php'; \$app = require_once 'bootstrap/app.php'; \$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); try { echo App\Models\User::count(); } catch (\Throwable \$e) { echo '0'; }" 2>/dev/null || echo "0")
+
+if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
+    echo "==> Fresh database detected. Seeding initial users and medicines catalog..."
+    php artisan db:seed --force || true
+else
+    echo "==> Existing database detected (${USER_COUNT} users found). Seeding skipped to preserve sales and inventory!"
+fi
 
 # Clear and optimize Laravel caches
 echo "==> Caching configuration, routes, and views..."

@@ -93,7 +93,58 @@ Mteja wako anaweza kuingia na kujaribu mfumo kwa kutumia akaunti zifuatazo ziliz
 
 ---
 
-### 💡 Kidokezo Muhimu Kuhusu Free Tier ya Render:
-- Seva ya bure ya Render huwa inalala (spin down) iwapo hakuna mtumiaji aliyetembelea ndani ya dakika 15.
-- Mtu akifungua link kwa mara ya kwanza baada ya kulala, itachukua kama sekunde 30 hadi 45 kuamka, kisha baada ya hapo inafanya kazi kwa kasi ya kawaida.
-- Ukitaka kuweka Database ya MySQL mtandaoni badala ya SQLite, unaweza kutumia **TiDB Cloud Serverless** (inatoa MySQL 8 bure ya 5GB milele bila kadi ya benki).
+## 🚨 KWANINI DATA ZILIKUWA ZIKIFUTIKA DESKTOP IKIZIMWA NA KUWASHWA?
+
+### Sababu ya Kitaalamu (The Root Cause):
+1. **Seva ya Bure ya Render haina Hard Disk ya Kudumu (Ephemeral Disk):**
+   - Wakati mfumo ulipowekwa mtandaoni kwa mara ya kwanza, ulisanidiwa kutumia **SQLite** (`DB_CONNECTION=sqlite`). SQLite inahifadhi taarifa kwenye faili moja lililopo ndani ya seva ya Render.
+   - Kwenye mpango wa bure wa Render, ikiwa hakuna mtu anayetumia mfumo ndani ya dakika 15 (kama vile usiku desktop ikizimwa na duka kufungwa), Render inazima seva (**Spins Down / Sleep**).
+   - Render inapozima seva, **inafuta na kuharibu kabisa faili hilo la SQLite** lililokuwa na mauzo yote ya siku hiyo!
+   - Asubuhi desktop ikifunguliwa, Render inaamka kama mtoto mchanga aliyetoka kuzaliwa: inatengeneza database mpya tupu, inaunda dawa zote kama bidhaa mpya, na **mauzo yote yaliyopita yanapotea kabisa (inasoma hakuna kilichouzwa)**!
+
+2. **Suluhisho Imara la Kudumu Duniani (The Permanent Solution):**
+   - Tenganisha **Database** na seva ya Render!
+   - Tumia Cloud Database huru ya **MySQL ya TiDB Cloud Serverless** (Bure 5GB milele, haizimi kamwe, haifuti data, na inaruhusu kompyuta ya dukani na simu ya Boss kuona data ileile kwa wakati mmoja).
+
+---
+
+## 🛠️ HATUA ZA KUPATA DATABASE YA KUDUMU (TiDB Cloud - Dakika 2 Pekee)
+
+### Hatua A: Jisajili na Utengeneze Database
+1. Fungua browser yako na nenda: **[https://tidbcloud.com](https://tidbcloud.com)**
+2. Bonyeza **Sign in with Google** (au GitHub) uingie moja kwa moja.
+3. Kwenye skrini, bofya kitufe cha **"Create Cluster"**.
+4. Chagua **TiDB Serverless (Free Forever)** -> Chagua Region ya karibu (mfano: **AWS / Frankfurt (eu-central-1)** au nyingine yoyote).
+5. Bonyeza **Create** (inachukua sekunde 5 tu kukamilika!).
+
+### Hatua B: Pata Taarifa za Muunganisho (Connection Details)
+1. Baada ya cluster kukamilika, bonyeza kitufe cha **"Connect"** (juu kulia).
+2. Chini ya **Connect with**, chagua **General / MySQL Client**.
+3. Utaona taarifa zifuatazo (zihifadhi au uziweke wazi):
+   - **Host:** (mfano: `gateway01.eu-central-1.prod.aws.tidbcloud.com`)
+   - **Port:** `4000`
+   - **User:** (mfano: `2ABCxxx.root`)
+   - **Password:** (bonyeza kitufe cha **Generate Password** kisha nakili nenosiri hilo).
+   - **Database:** `njama_pharmacy` *(kwenye tab ya "SQL Editor" ya TiDB, andika: `CREATE DATABASE njama_pharmacy;` kisha bofya Run)*.
+
+### Hatua C: Bandika Taarifa Hizo Kwenye Render Dashboard
+1. Ingia kwenye Dashboard yako ya **[Render.com](https://dashboard.render.com)**.
+2. Bonyeza Web Service yako ya **`njama-pharmacy`**.
+3. Kwenye menyu ya kushoto, bonyeza **Environment**.
+4. Badilisha au Ongeza Variables hizi:
+   - `DB_CONNECTION` = `mysql`
+   - `DB_HOST` = *(Bandika Host yako ya TiDB hapa)*
+   - `DB_PORT` = `4000`
+   - `DB_DATABASE` = `njama_pharmacy`
+   - `DB_USERNAME` = *(Bandika User wako wa TiDB hapa)*
+   - `DB_PASSWORD` = *(Bandika Password uliyopewa hapa)*
+   - `MYSQL_ATTR_SSL_CA` = `/etc/ssl/certs/ca-certificates.crt`
+5. Bonyeza **Save Changes**!
+
+---
+
+### 🎉 MATOKEO BAADA YA KUBADILISHA HII:
+- Render itajenga na kuunganisha mfumo na TiDB Cloud kiotomatiki.
+- Kila dawa inayouzwa dukani inatunzwa moja kwa moja kwenye Cloud Database ya TiDB.
+- **Hata desktop izimwe kwa siku 10, ikifunguliwa mauzo yote yapo salama 100%!**
+- **Boss (Dr. Njama) akifungua simu yake akiwa popote, anaona kila senti iliyouzwa bila kukosa hata senti moja!**

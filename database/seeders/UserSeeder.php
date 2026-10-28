@@ -59,7 +59,7 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $u) {
-            User::updateOrCreate(['username' => $u['username']], $u);
+            User::firstOrCreate(['username' => $u['username']], $u);
         }
     }
 }
