@@ -114,16 +114,61 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                @if($batch->status === 'active' && $batch->quantity_remaining > 0)
-                                    <form action="{{ route('batches.quarantine', $batch->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <input type="hidden" name="action" value="quarantine">
-                                        <input type="hidden" name="reason" value="Quarantine triggered from product view">
-                                        <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2" title="Quarantine Batch">
-                                            <i class="bi bi-shield-x"></i>
-                                        </button>
-                                    </form>
-                                @endif
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" title="Hariri Batch & Idadi" data-bs-toggle="modal" data-bs-target="#editBatchModal{{ $batch->id }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                    @if($batch->status === 'active' && $batch->quantity_remaining > 0)
+                                        <form action="{{ route('batches.quarantine', $batch->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="action" value="quarantine">
+                                            <input type="hidden" name="reason" value="Quarantine triggered from product view">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2" title="Quarantine Batch">
+                                                <i class="bi bi-shield-x"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+
+                                <!-- Edit Batch Modal -->
+                                <div class="modal fade" id="editBatchModal{{ $batch->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered text-start">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-emerald text-white" style="background-color: #0f766e;">
+                                                <h6 class="modal-title fw-bold text-white"><i class="bi bi-pencil-square me-2"></i>Hariri Batch: {{ $batch->batch_number }}</h6>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form action="{{ route('batches.update', $batch->id) }}" method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-bold">Namba ya Batch <span class="text-danger">*</span></label>
+                                                        <input type="text" name="batch_number" class="form-control" value="{{ $batch->batch_number }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-bold">Idadi Iliyobaki Stoo (Quantity Remaining) <span class="text-danger">*</span></label>
+                                                        <input type="number" name="quantity_remaining" class="form-control fw-bold text-primary fs-5" value="{{ (float)$batch->quantity_remaining }}" min="0" step="any" required>
+                                                        <small class="text-muted">Badilisha namba hii kurekebisha idadi ya dawa zilizopo kwenye batch hii.</small>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-bold">Tarehe ya Kuisha (Expiry Date)</label>
+                                                        <input type="date" name="expiry_date" class="form-control" value="{{ $batch->expiry_date ? $batch->expiry_date->format('Y-m-d') : '' }}">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label small fw-bold">Sababu ya Marekebisho (Notes)</label>
+                                                        <input type="text" name="notes" class="form-control" placeholder="Mfano: Kuhesabu upya...">
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light">
+                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Ghairi</button>
+                                                    <button type="submit" class="btn btn-emerald btn-sm fw-bold">Hifadhi Mabadiliko</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         @empty

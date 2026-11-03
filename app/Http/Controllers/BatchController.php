@@ -60,6 +60,64 @@ class BatchController extends Controller
         return view('batches.index', compact('batches', 'status', 'expiryFilter', 'search'));
     }
 
+    public function update(Request $request, InventoryBatch $batch)
+    {
+        $validated = $request->validate([
+            'batch_number' => 'required|string|max:100',
+            'quantity_remaining' => 'required|numeric|min:0',
+            'expiry_date' => 'nullable|date',
+            'notes' => 'nullable|string|max:255',
+        ]);
+
+        $oldQty = (float) $batch->quantity_remaining;
+        $newQty = (float) $validated['quantity_remaining'];
+        $diff = $newQty - $oldQty;
+
+        DB::transaction(function () use ($batch, $validated, $oldQty, $newQty, $diff, $request) {
+            $batch->batch_number = $validated['batch_number'];
+            $batch->quantity_remaining = $newQty;
+            $batch->expiry_date = $validated['expiry_date'] ?? null;
+            if ($diff > 0) {
+                $batch->quantity_received += $diff;
+            }
+            if ($batch->quantity_remaining <= 0) {
+                $batch->status = 'depleted';
+            } elseif ($batch->status === 'depleted') {
+                $batch->status = 'active';
+            }
+            $batch->save();
+
+            if (abs($diff) > 0.0001) {
+                InventoryMovement::create([
+                    'product_id' => $batch->product_id,
+                    'batch_id' => $batch->id,
+                    'movement_type' => $diff > 0 ? 'adjustment_in' : 'adjustment_out',
+                    'quantity' => $diff,
+                    'balance_after' => $batch->product->total_stock,
+                    'unit_cost' => $batch->purchase_cost,
+                    'reference_type' => 'BatchAdjustment',
+                    'reference_id' => $batch->batch_number,
+                    'notes' => $validated['notes'] ?: "Marekebisho ya moja kwa moja ya batch #{$batch->batch_number}: {$oldQty} -> {$newQty}",
+                    'user_id' => auth()->id(),
+                    'created_at' => now(),
+                ]);
+            }
+
+            AuditLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'batch_updated',
+                'description' => "Updated batch {$batch->batch_number} of {$batch->product->generic_name}. Qty changed from {$oldQty} to {$newQty}.",
+                'entity_type' => 'InventoryBatch',
+                'entity_id' => $batch->id,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'created_at' => now(),
+            ]);
+        });
+
+        return back()->with('success', "Taarifa na idadi ya batch #{$batch->batch_number} zimesasishwa kikamilifu.");
+    }
+
     public function quarantine(Request $request, InventoryBatch $batch)
     {
         $validated = $request->validate([

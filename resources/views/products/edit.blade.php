@@ -75,6 +75,73 @@
                 </div>
 
                 <hr class="my-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-box-seam text-emerald me-2"></i>Usimamizi na Marekebisho ya Idadi ya Dawa Stoo (Stock Adjustment)</h6>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6">
+                        Stoo Iliyopo Sasa: <strong>{{ (float)$product->total_stock }} {{ $product->unit ? $product->unit->code : 'PCS' }}</strong>
+                    </span>
+                </div>
+
+                <div class="p-3 bg-light rounded-3 border mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-dark">Rekebisha Idadi ya Dawa (Current Stock) <span class="text-primary">*</span></label>
+                            <input type="number" name="stock_quantity" class="form-control form-control-lg fw-bold text-primary" value="{{ old('stock_quantity', (float)$product->total_stock) }}" min="0" step="any" required>
+                            <small class="text-muted">Andika idadi mpya ya dawa zilizopo stoo hapa.</small>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold small">Sababu ya Kurekebisha Idadi (Adjustment Reason)</label>
+                            <input type="text" name="stock_adjustment_reason" class="form-control" placeholder="Mfano: Marekebisho ya stoo, Kuhesabu upya, Dawa ziliongezwa" value="{{ old('stock_adjustment_reason') }}">
+                            <small class="text-muted">Sababu itawekwa kwenye rekodi za ukaguzi (Stock Movements & Audit Log).</small>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Tarehe ya Kuisha (Expiry Date)</label>
+                            @php
+                                $earliestBatch = $product->eligibleBatchesFefo()->first();
+                            @endphp
+                            <input type="date" name="expiry_date" class="form-control" value="{{ old('expiry_date', $earliestBatch && $earliestBatch->expiry_date ? $earliestBatch->expiry_date->format('Y-m-d') : '') }}">
+                            <small class="text-muted">Hiari: Sasisha tarehe ya kuisha kwa batch inayotumika.</small>
+                        </div>
+                    </div>
+
+                    @if($product->batches->count() > 0)
+                    <div class="mt-3 pt-3 border-top">
+                        <span class="small fw-bold text-muted text-uppercase d-block mb-2">Mabatch Yaliyopo (Existing Batches):</span>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered bg-white mb-0 align-middle">
+                                <thead class="table-light small">
+                                    <tr>
+                                        <th>Batch #</th>
+                                        <th>Expiry Date</th>
+                                        <th class="text-center">Zilizoingia</th>
+                                        <th class="text-center">Zilizobaki</th>
+                                        <th class="text-center">Hali</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($product->batches as $b)
+                                    <tr class="small">
+                                        <td class="fw-semibold">{{ $b->batch_number }}</td>
+                                        <td>{{ $b->expiry_date ? $b->expiry_date->format('d/m/Y') : 'N/A' }}</td>
+                                        <td class="text-center">{{ (float)$b->quantity_received }}</td>
+                                        <td class="text-center fw-bold text-success">{{ (float)$b->quantity_remaining }}</td>
+                                        <td class="text-center">
+                                            @if($b->status === 'active')
+                                                <span class="badge bg-success-subtle text-success">Active</span>
+                                            @else
+                                                <span class="badge bg-secondary">{{ ucfirst($b->status) }}</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                <hr class="my-4">
                 <h6 class="fw-bold mb-3"><i class="bi bi-cash-coin text-emerald me-2"></i>Bei za Dawa (Pricing & History)</h6>
 
                 <div class="row g-3 mb-3">

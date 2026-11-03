@@ -88,15 +88,16 @@
                     <thead>
                         <tr>
                             <th>Item Description</th>
-                            <th class="text-center" style="width: 130px;">Quantity</th>
-                            <th class="text-end" style="width: 120px;">Price (TZS)</th>
-                            <th class="text-end" style="width: 130px;">Total (TZS)</th>
-                            <th class="text-center" style="width: 50px;"></th>
+                            <th class="text-center" style="width: 120px;">Quantity</th>
+                            <th class="text-end" style="width: 110px;">Price (TZS)</th>
+                            <th class="text-center" style="width: 115px;">Discount (TZS)</th>
+                            <th class="text-end" style="width: 120px;">Total (TZS)</th>
+                            <th class="text-center" style="width: 45px;"></th>
                         </tr>
                     </thead>
                     <tbody id="cartTableBody">
                         <tr id="emptyCartRow">
-                            <td colspan="5" class="text-center py-5 text-muted">
+                            <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="bi bi-cart-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Kikapu kipo wazi. Tafuta dawa au scan barcode hapo juu (F2).
                             </td>
@@ -112,7 +113,10 @@
                 </div>
                 <div class="text-end">
                     <span class="text-muted small me-2">Subtotal:</span>
-                    <span class="h5 fw-bold mb-0 text-dark">Tsh <span id="cartSubtotalText">0</span></span>
+                    <span class="h6 fw-bold mb-0 text-dark">Tsh <span id="cartSubtotalText">0</span></span>
+                    <span class="badge bg-danger-subtle text-danger ms-2" id="cartDiscountBadge" style="display: none;">
+                        Punguzo: -Tsh <span id="cartDiscountText">0</span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -136,6 +140,31 @@
                     <div class="mb-2">
                         <input type="text" id="customerPhoneInput" class="form-control form-control-sm" placeholder="Phone Number (e.g. 0715...)">
                     </div>
+                </div>
+            </div>
+
+            <!-- Price Summary & Overall Discount Breakdown -->
+            <div class="p-3 bg-light rounded-3 mb-3 border">
+                <div class="d-flex justify-content-between align-items-center mb-1 small">
+                    <span class="text-muted fw-semibold">Jumla ya Dawa (Subtotal):</span>
+                    <span class="fw-bold">Tsh <span id="summarySubtotalDisplay">0</span></span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2 small">
+                    <span class="text-muted fw-semibold">Punguzo la Dawa (Items Disc.):</span>
+                    <span class="fw-bold text-danger">- Tsh <span id="summaryItemDiscountDisplay">0</span></span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2 small pt-1 border-top">
+                    <label for="overallDiscountInput" class="text-dark fw-bold mb-0">
+                        <i class="bi bi-tag-fill text-danger me-1"></i>Punguzo la Bili (Order Disc.):
+                    </label>
+                    <div class="input-group input-group-sm" style="max-width: 135px;">
+                        <span class="input-group-text bg-white px-2">Tsh</span>
+                        <input type="number" id="overallDiscountInput" class="form-control form-control-sm text-end fw-bold px-2" placeholder="0" min="0" step="100" value="0" oninput="renderCart()">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-1 border-top small fw-bold text-danger">
+                    <span>Jumla ya Punguzo (Total Discount):</span>
+                    <span>- Tsh <span id="summaryTotalDiscountDisplay">0</span></span>
                 </div>
             </div>
 
@@ -361,6 +390,7 @@
     }
 
     function renderCart() {
+        const overallDiscountInput = document.getElementById('overallDiscountInput');
         if (cart.length === 0) {
             emptyCartRow.classList.remove('d-none');
             cartTableBody.innerHTML = '';
@@ -368,6 +398,11 @@
             cartItemCount.innerText = '0';
             document.getElementById('summaryTotalItems').innerText = '0';
             cartSubtotalText.innerText = '0';
+            if (document.getElementById('summarySubtotalDisplay')) document.getElementById('summarySubtotalDisplay').innerText = '0';
+            if (document.getElementById('summaryItemDiscountDisplay')) document.getElementById('summaryItemDiscountDisplay').innerText = '0';
+            if (document.getElementById('summaryTotalDiscountDisplay')) document.getElementById('summaryTotalDiscountDisplay').innerText = '0';
+            const cartDiscountBadge = document.getElementById('cartDiscountBadge');
+            if (cartDiscountBadge) cartDiscountBadge.style.display = 'none';
             grandTotalDisplay.innerText = '0';
             calculateChange();
             return;
@@ -377,11 +412,19 @@
         cartTableBody.innerHTML = '';
 
         let subtotal = 0;
+        let totalItemDiscount = 0;
         let totalItems = 0;
 
         cart.forEach((item, index) => {
-            const itemTotal = (item.quantity * item.unit_price) - item.discount;
-            subtotal += itemTotal;
+            const rawItemSubtotal = item.quantity * item.unit_price;
+            let itemDisc = parseFloat(item.discount) || 0;
+            if (itemDisc < 0) itemDisc = 0;
+            if (itemDisc > rawItemSubtotal) itemDisc = rawItemSubtotal;
+            item.discount = itemDisc;
+
+            const itemTotal = rawItemSubtotal - itemDisc;
+            subtotal += rawItemSubtotal;
+            totalItemDiscount += itemDisc;
             totalItems += item.quantity;
 
             const tr = document.createElement('tr');
@@ -393,14 +436,17 @@
                 <td class="text-center">
                     <div class="input-group input-group-sm justify-content-center">
                         <button class="btn btn-outline-secondary" type="button" onclick="updateQty(${index}, -1)">-</button>
-                        <input type="number" class="form-control text-center" style="max-width: 60px;" value="${item.quantity}" min="1" max="${item.stock}" onchange="setQty(${index}, this.value)">
+                        <input type="number" class="form-control text-center px-1" style="max-width: 55px;" value="${item.quantity}" min="1" max="${item.stock}" onchange="setQty(${index}, this.value)">
                         <button class="btn btn-outline-secondary" type="button" onclick="updateQty(${index}, 1)">+</button>
                     </div>
                 </td>
                 <td class="text-end fw-semibold">Tsh ${new Intl.NumberFormat().format(item.unit_price)}</td>
+                <td class="text-center">
+                    <input type="number" class="form-control form-control-sm text-end fw-bold text-danger px-1" style="max-width: 95px; margin: 0 auto;" placeholder="0" min="0" max="${rawItemSubtotal}" step="50" value="${item.discount > 0 ? item.discount : ''}" oninput="setDiscount(${index}, this.value)" title="Weka punguzo kwa dawa hii">
+                </td>
                 <td class="text-end fw-bold text-dark">Tsh ${new Intl.NumberFormat().format(itemTotal)}</td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-link text-danger p-0" onclick="removeFromCart(${index})">
+                    <button class="btn btn-sm btn-link text-danger p-0" onclick="removeFromCart(${index})" title="Ondoa">
                         <i class="bi bi-x-circle-fill fs-5"></i>
                     </button>
                 </td>
@@ -408,17 +454,51 @@
             cartTableBody.appendChild(tr);
         });
 
+        const overallDiscountVal = parseFloat(overallDiscountInput ? overallDiscountInput.value : 0) || 0;
+        const totalDiscount = Math.min(subtotal, totalItemDiscount + overallDiscountVal);
+        const grandTotal = Math.max(0, subtotal - totalDiscount);
+
         cartItemCount.innerText = cart.length;
         document.getElementById('summaryTotalItems').innerText = totalItems;
         cartSubtotalText.innerText = new Intl.NumberFormat().format(subtotal);
-        grandTotalDisplay.innerText = new Intl.NumberFormat().format(subtotal);
+        if (document.getElementById('summarySubtotalDisplay')) {
+            document.getElementById('summarySubtotalDisplay').innerText = new Intl.NumberFormat().format(subtotal);
+        }
+        if (document.getElementById('summaryItemDiscountDisplay')) {
+            document.getElementById('summaryItemDiscountDisplay').innerText = new Intl.NumberFormat().format(totalItemDiscount);
+        }
+        if (document.getElementById('summaryTotalDiscountDisplay')) {
+            document.getElementById('summaryTotalDiscountDisplay').innerText = new Intl.NumberFormat().format(totalDiscount);
+        }
+        const cartDiscountBadge = document.getElementById('cartDiscountBadge');
+        if (cartDiscountBadge) {
+            if (totalDiscount > 0) {
+                cartDiscountBadge.style.display = 'inline-block';
+                document.getElementById('cartDiscountText').innerText = new Intl.NumberFormat().format(totalDiscount);
+            } else {
+                cartDiscountBadge.style.display = 'none';
+            }
+        }
+        grandTotalDisplay.innerText = new Intl.NumberFormat().format(grandTotal);
 
         // Auto-set cash if empty
         if (!amountPaidInput.value || parseFloat(amountPaidInput.value) === 0) {
-            amountPaidInput.value = subtotal;
+            amountPaidInput.value = grandTotal;
         }
 
         calculateChange();
+    }
+
+    function setDiscount(index, val) {
+        const item = cart[index];
+        let disc = parseFloat(val);
+        if (isNaN(disc) || disc < 0) disc = 0;
+        const rawSub = item.quantity * item.unit_price;
+        if (disc > rawSub) {
+            disc = rawSub;
+        }
+        item.discount = disc;
+        renderCart();
     }
 
     function updateQty(index, delta) {
@@ -456,23 +536,36 @@
     function clearCart() {
         if (cart.length > 0 && confirm('Unataka kufuta dawa zote kwenye kikapu?')) {
             cart = [];
+            if (document.getElementById('overallDiscountInput')) {
+                document.getElementById('overallDiscountInput').value = '0';
+            }
+            amountPaidInput.value = '';
             renderCart();
         }
     }
 
+    function getGrandTotal() {
+        let subtotal = 0;
+        let totalItemDiscount = 0;
+        cart.forEach(item => {
+            const raw = item.quantity * item.unit_price;
+            subtotal += raw;
+            totalItemDiscount += Math.min(raw, Math.max(0, parseFloat(item.discount) || 0));
+        });
+        const overallDiscount = parseFloat(document.getElementById('overallDiscountInput')?.value) || 0;
+        const totalDiscount = Math.min(subtotal, totalItemDiscount + overallDiscount);
+        return Math.max(0, subtotal - totalDiscount);
+    }
+
     function calculateChange() {
-        const subtotal = getSubtotal();
+        const grandTotal = getGrandTotal();
         const paid = parseFloat(amountPaidInput.value) || 0;
-        const change = Math.max(0, paid - subtotal);
+        const change = Math.max(0, paid - grandTotal);
         changeDueDisplay.innerText = new Intl.NumberFormat().format(change);
     }
 
-    function getSubtotal() {
-        return cart.reduce((sum, item) => sum + ((item.quantity * item.unit_price) - item.discount), 0);
-    }
-
     function setExactAmount() {
-        amountPaidInput.value = getSubtotal();
+        amountPaidInput.value = getGrandTotal();
         calculateChange();
     }
 
@@ -489,7 +582,7 @@
             cashSection.classList.remove('d-none');
         } else {
             // For digital/bank payments, amount paid defaults to exact
-            amountPaidInput.value = getSubtotal();
+            amountPaidInput.value = getGrandTotal();
             calculateChange();
         }
     }
@@ -501,12 +594,13 @@
             return;
         }
 
-        const subtotal = getSubtotal();
+        const grandTotal = getGrandTotal();
         const amountPaid = parseFloat(amountPaidInput.value) || 0;
         const method = document.querySelector('input[name="payMethod"]:checked').value;
+        const overallDiscount = parseFloat(document.getElementById('overallDiscountInput')?.value) || 0;
 
-        if (amountPaid < subtotal && method === 'cash') {
-            alert(`Pesa iliyolipwa (Tsh ${amountPaid}) haitoshi jumla ya bili (Tsh ${subtotal}).`);
+        if (amountPaid < grandTotal && method === 'cash') {
+            alert(`Pesa iliyolipwa (Tsh ${new Intl.NumberFormat().format(amountPaid)}) haitoshi jumla ya bili (Tsh ${new Intl.NumberFormat().format(grandTotal)}).`);
             return;
         }
 
@@ -515,8 +609,9 @@
                 product_id: item.id,
                 quantity: item.quantity,
                 unit_price: item.unit_price,
-                discount: item.discount,
+                discount: item.discount || 0,
             })),
+            overall_discount: overallDiscount,
             payment_method: method,
             amount_paid: amountPaid,
             customer_name: document.getElementById('customerNameInput').value.trim(),
@@ -559,6 +654,10 @@
 
                 // Clear POS for next sale
                 cart = [];
+                if (document.getElementById('overallDiscountInput')) {
+                    document.getElementById('overallDiscountInput').value = '0';
+                }
+                amountPaidInput.value = '';
                 renderCart();
                 document.getElementById('customerNameInput').value = '';
                 document.getElementById('customerPhoneInput').value = '';
@@ -584,6 +683,10 @@
 
         alert('Mauzo yamehifadhiwa kwenye kumbukumbu ya kompyuta (Offline Queue). Mtandao ukirejea yatatumwa moja kwa moja.');
         cart = [];
+        if (document.getElementById('overallDiscountInput')) {
+            document.getElementById('overallDiscountInput').value = '0';
+        }
+        amountPaidInput.value = '';
         renderCart();
         updateOfflineUI();
 

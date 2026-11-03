@@ -96,6 +96,27 @@
                 </div>
 
                 <hr class="my-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-boxes text-emerald me-2"></i>Idadi ya Awali ya Dawa na Batch (Initial Stock)</h6>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">Idadi ya Dawa Zilizopo Stoo (Initial Quantity) <span class="badge bg-light text-muted border">Hiari</span></label>
+                        <input type="number" name="initial_quantity" class="form-control fw-bold text-primary" value="{{ old('initial_quantity', 0) }}" min="0" step="any" placeholder="0">
+                        <small class="text-muted">Weka idadi ya dawa zilizopo stoo kwa sasa (ikiachwa 0 haitaongeza stoo).</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">Namba ya Batch (Batch Number)</label>
+                        <input type="text" name="batch_number" class="form-control" value="{{ old('batch_number') }}" placeholder="Mfano BATCH-001 (Hiari)">
+                        <small class="text-muted">Ikiachwa wazi itazalishwa kiotomatiki na mfumo.</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">Tarehe ya Kuisha Muda (Expiry Date)</label>
+                        <input type="date" name="expiry_date" class="form-control" value="{{ old('expiry_date') }}">
+                        <small class="text-muted">Tarehe ya mwisho ya matumizi ya dawa hizi.</small>
+                    </div>
+                </div>
+
+                <hr class="my-4">
                 <h6 class="fw-bold mb-3"><i class="bi bi-shield-check text-emerald me-2"></i>Vigezo vya Kisheria na Uhifadhi</h6>
 
                 <div class="row g-3 mb-4">

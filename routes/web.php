@@ -71,7 +71,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
         Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
 
-        // Batch Actions: Quarantine, Write-off
+        // Batch Actions: Update, Quarantine, Write-off
+        Route::put('/batches/{batch}', [BatchController::class, 'update'])->name('batches.update');
         Route::post('/batches/{batch}/quarantine', [BatchController::class, 'quarantine'])->name('batches.quarantine');
         Route::post('/batches/{batch}/write-off', [BatchController::class, 'writeOff'])->name('batches.write-off');
     });

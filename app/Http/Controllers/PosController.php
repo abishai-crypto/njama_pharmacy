@@ -103,6 +103,7 @@ class PosController extends Controller
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.unit_price' => 'required|numeric|min:0',
             'items.*.discount' => 'nullable|numeric|min:0',
+            'overall_discount' => 'nullable|numeric|min:0',
             'customer_id' => 'nullable|exists:customers,id',
             'customer_name' => 'nullable|string|max:255',
             'customer_phone' => 'nullable|string|max:50',
@@ -208,6 +209,7 @@ class PosController extends Controller
                     }
 
                     $itemSubtotal = $requestedQty * $unitPrice;
+                    $discount = min($itemSubtotal, $discount);
                     $itemTotal = max(0, $itemSubtotal - $discount);
 
                     $subtotal += $itemSubtotal;
@@ -226,6 +228,8 @@ class PosController extends Controller
                     ];
                 }
 
+                $overallDiscount = (float) ($validated['overall_discount'] ?? 0);
+                $totalDiscount = min($subtotal, $totalDiscount + $overallDiscount);
                 $totalAmount = max(0, $subtotal - $totalDiscount);
                 $amountPaid = (float) $validated['amount_paid'];
                 $changeDue = max(0, $amountPaid - $totalAmount);
@@ -368,6 +372,8 @@ class PosController extends Controller
                 'message' => 'Mauzo yamekamilika kikamilifu.',
                 'sale_id' => $sale->id,
                 'invoice_number' => $sale->invoice_number,
+                'subtotal' => (float) $sale->subtotal,
+                'discount_amount' => (float) $sale->discount_amount,
                 'total_amount' => (float) $sale->total_amount,
                 'change_due' => (float) $sale->change_due,
                 'receipt_url' => route('pos.receipt', $sale->id),
